@@ -1,14 +1,9 @@
-# Use OpenJDK 17 (matches your pom.xml)
-FROM openjdk:17-jdk-slim
-
-# Set working directory
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
 WORKDIR /app
-
-# Copy the built JAR
-COPY target/*.jar app.jar
-
-# Expose port (Render assigns dynamically; your app uses ${PORT:8080})
+COPY . .
+RUN mvn clean package -DskipTests
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
 EXPOSE $PORT
-
-# Run the app
 ENTRYPOINT ["java", "-jar", "app.jar"]
